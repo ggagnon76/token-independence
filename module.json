@@ -24,7 +24,7 @@
     
   ],
   "scripts": [
-    "/scripts/lib/Independence.js"
+    "/scripts/independence.js"
   ],
   "styles": [
     
