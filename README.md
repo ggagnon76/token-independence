@@ -4,7 +4,7 @@ Allow tokens to live and work in scenes free of their actor overlords!
 WARNING: This module is very much an ALPHA and has barely had any testing.  If using this module causes loss of data or corrupts a world, you have been warned.
 
 See the Proof of Concept in action:
-https://youtu.be/40zC-dGjw-s
+[![Watch the video](https://img.youtube.com/vi/40zC-dGjw-s/maxresdefault.jpg)](https://youtu.be/40zC-dGjw-s)
 
 This module allows a GM to populate a scene with tokens from actors, then delete the actors from the actors folder (to keep things tidy).  The module will populate the scene flags with the bare minimum data to create synthetic actors for tokens with "null" actor data.
 
