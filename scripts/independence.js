@@ -44,6 +44,9 @@ Hooks.on('preDeleteActor', async (actor, options, userId) => {
     delete dupActor["token"];
     delete dupActor["sort"];
     await canvas.scene.setFlag("token-independence", name, dupActor);
+    
+    // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
+    canvas.tokens.updateAll(t => ({name: actor.name}), t => t.data.actorId === actor._id);
 })
 
 Hooks.on('deleteToken', async (scene, token, options, userId) => {
