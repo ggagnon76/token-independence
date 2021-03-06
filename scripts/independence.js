@@ -41,7 +41,6 @@ Hooks.on('preDeleteActor', async (actor, options, userId) => {
     const dupActor = duplicate(actor);
     delete dupActor["flags"];
     delete dupActor["folder"];
-    delete dupActor["token"];
     delete dupActor["sort"];
     await canvas.scene.setFlag("token-independence", name, dupActor);
     
