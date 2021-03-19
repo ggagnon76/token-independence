@@ -1,5 +1,3 @@
-import Actor5e from "../../systems/dnd5e/module/actor/entity.js";
-
 Hooks.on('canvasReady', () =>  {
     
     const IndTokenArr = [];
@@ -24,7 +22,7 @@ Hooks.on('canvasReady', () =>  {
             continue;
         }
 
-        actor = new Actor5e(freedomFighterObj);
+        actor = new game.dnd5e.entities.Actor5e(freedomFighterObj);
         synthActor = actor.constructor.createTokenActor(actor, token);
         token.actor = synthActor;
     }
