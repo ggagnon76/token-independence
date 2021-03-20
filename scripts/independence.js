@@ -22,7 +22,7 @@ Hooks.on('canvasReady', () =>  {
             continue;
         }
 
-        actor = new Actor(freedomFighterObj);
+        actor = new game.dnd5e.entities.Actor5e(freedomFighterObj);
         synthActor = actor.constructor.createTokenActor(actor, token);
         token.actor = synthActor;
     }
@@ -39,7 +39,6 @@ Hooks.on('preDeleteActor', async (actor, options, userId) => {
     }
 
     const dupActor = duplicate(actor);
-    delete dupActor["flags"];
     delete dupActor["folder"];
     delete dupActor["sort"];
     await canvas.scene.setFlag("token-independence", name, dupActor);
