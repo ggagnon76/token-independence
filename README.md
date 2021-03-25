@@ -1,6 +1,6 @@
 [![GitHub downloads (latest)](https://img.shields.io/badge/dynamic/json?label=Downloads@latest&query=assets[?(@.name.includes('zip'))].download_count&url=https://api.github.com/repos/ggagnon76/token-independence/releases/latest&color=green)](https://github.com/ggagnon76/token-independence/releases/latest)
 # Token-Independence
-Allow tokens to live and work in scenes free of their actor overlords!
+Allow tokens to live and fully function in scenes, free of their actor overlords!
 
 WARNING: This module is very much an ALPHA and has barely had any testing.  If using this module causes loss of data or corrupts a world, you have been warned.
 
@@ -13,7 +13,7 @@ The populated scenes can be stored in a compendium and pulled out for use at any
 
 This module, at this release,  **SHOULD** be system agnostic.  Any modules that monkeypatch actor creation functions/methods or the core actor object will probably not work correctly.
 
-The data stored in the scene is a fraction of what actors in the actors folder contain, so this module should reduce the data uploaded to clients.  However, if the same actor/creature is embedded in several scenes, which are all in the scenes folder, then those gains could become losses, ie: you'll upload more data than just having the actor in the actors folder in the first place.  Keep your scenes folder tidy too, store what you don't immediately need in a compendium, and you **SHOULD** see improvements in upload performance.  I say 'should' because this has not been verified.  At all. It's just theory.
+The data stored in the scene doesn't contain the entire structure of an actor in the actors folder, so this module should reduce the data uploaded to clients.  However, if the same actor/creature is embedded in several scenes, which are all in the scenes folder, then those gains could become losses, ie: you'll upload more data than just having the actor in the actors folder in the first place.  Keep your scenes folder tidy too, store what you don't immediately need in a compendium, and you **SHOULD** see improvements in upload performance.  I say 'should' because this has not been verified.  At all. It's just theory.
 
 Once the actor is deleted, it cannot be modified (in this version).  In other words, you can't give ownership of the actor to a player once it is embedded in a scene.  You have to give your player ownership (or any other UI manipulation of the actor) and THEN delete the actor.
 
