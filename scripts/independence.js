@@ -66,12 +66,16 @@ Hooks.on('pasteToken', (tokenCollection, tokenArray) => {
 Hooks.on("renderSidebarTab", async (app, html) => {
     // This script is only for a GM
     if(game.user.isGM) {
-        // Create a button that when clicked, will create the actor "DDB Temp Actor".  Insert the button before the search field on the Actor tab.
-        let button = $("<div class='header-actions action-buttons flexrow'><button class='ddb-import'>Token Independence</button>")
-        button.click(function () {
-            createDialog();
-        });
-        html.find("div.header-search.flexrow").before(button);}
+        // Only render on Actors tab
+        if (app.options.id == "actors") {
+            // Create a button that when clicked, will create the actor "DDB Temp Actor".  Insert the button before the search field on the Actor tab.
+            let button = $("<div class='header-actions action-buttons flexrow'><button class='ddb-import'>Token Independence</button>")
+            button.click(function () {
+                createDialog();
+            });
+            html.find("div.header-search.flexrow").before(button);
+        }
+    }
 })
 
 function createDialog() {
