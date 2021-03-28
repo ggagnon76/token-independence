@@ -28,36 +28,6 @@ Hooks.on('canvasReady', () =>  {
     }
 })
 
-Hooks.on('preDeleteActor', async (actor, options, userId) => {
-    const name = actor.name;
-    const tokenArr = actor.getActiveTokens();
-    if (tokenArr.length === 0) return;
-    const isIndFlag = canvas.scene.data.flags.hasOwnProperty("token-independence");
-    if (isIndFlag) {
-        const isFreedomFighter = canvas.scene.data.flags["token-independence"][name] ? true : false;
-        if (isFreedomFighter) return;
-    }
-
-    const dupActor = duplicate(actor);
-    delete dupActor["folder"];
-    delete dupActor["sort"];
-    await canvas.scene.setFlag("token-independence", name, dupActor);
-    
-    // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
-    canvas.tokens.updateAll(t => ({name: actor.name}), t => t.data.actorId === actor._id);
-})
-
-Hooks.on('deleteToken', async (scene, token, options, userId) => {
-    const TokenArr = canvas.tokens.placeables;
-    const TokenActorArr = TokenArr.filter(n => n.data.name === token.name);
-    if (TokenActorArr.length > 0) return;
-
-    const isIndFlag = canvas.scene.data.flags.hasOwnProperty("token-independence");
-    if (!isIndFlag) return;
-
-    await canvas.scene.unsetFlag("token-independence", token.name);
-})
-
 Hooks.on('pasteToken', (tokenCollection, tokenArray) => {
     canvas.draw();
 })
@@ -80,9 +50,12 @@ Hooks.on("renderSidebarTab", async (app, html) => {
 
 function createDialog() {
     const title = `Token-Independence Options`;
-    const content = ``;
-    const buttons = {Remove: {label: "Remove embedded actors from scene", callback: () => {removeActors()}}}
-    dialog = new Dialog({title, content, buttons}).render(true);
+    const content = `<style>#TIoptionButtons .dialog-buttons {flex-direction: column;}</style>`;
+    const buttons = {   
+                    Add: {label: "Embed actor(s) into scene", callback: () => {addActors()}},
+                    Remove: {label: "Remove embedded actor(s) from scene", callback: () => {removeActors()}}
+                    }
+    dialog = new Dialog({title, content, buttons}, {id: "TIoptionButtons"}).render(true);
 }
 
 function removeActors() {
@@ -91,7 +64,8 @@ function removeActors() {
     let content = ``;
     let buttons = {}
     const isIndFlag = canvas.scene.data.flags.hasOwnProperty("token-independence");
-    if (!isIndFlag) {
+    const flagKeys = Object.keys(canvas.scene.data.flags["token-independence"])
+    if (!isIndFlag || flagKeys.length === 0) {
         content = `There are no embedded actors in this scene`;
         buttons = {Exit: {label: "Exit", callback: () => {dialog.close()}}};
     } else {
@@ -116,19 +90,78 @@ function removeActors() {
     const dialogDOM = document.querySelector(`#${dialog.id}`);
     dialogDOM.style.height = "";
     dialog.position.height = null;
-}
 
-async function deleteActors(html, Arr = []) {
-    debugger;
-    if (Arr.length === 0) {
-        const cbs = html.find('[id="check"]');  // array
-        for (const cb of cbs) {
-            if (cb.checked) {
-                Arr.push(cb.value);
+    async function deleteActors(html, Arr = []) {
+        if (Arr.length === 0) {
+            const cbs = html.find('[id="check"]');  // array
+            for (const cb of cbs) {
+                if (cb.checked) {
+                    Arr.push(cb.value);
+                }
             }
         }
-    }
-    for (const actor of Arr) {
-        await canvas.scene.unsetFlag("token-independence", actor);
+        for (const actor of Arr) {
+            await canvas.scene.unsetFlag("token-independence", actor);
+        }
     }
 }
+
+function addActors() {
+    const sceneName = canvas.scene.data.name;
+    const title = `Embed actor(s) to scene "${sceneName}"`;
+    let content = ``;
+    let buttons = {}
+
+    let TokenArr = [];
+    canvas.tokens.placeables.forEach(token => TokenArr.push(token.data.name));
+    const actorArr = [... new Set(TokenArr)];
+
+    if (actorArr.length === 0) {
+        content = `There are no tokens placed in the scene.  Place a token for the actor(s) you wish to embed first!`;
+        buttons = {Exit: {label: "Exit", callback: () => {dialog.close()}}};
+    } else {
+        content =   `<h2>Select actor(s) and Embed or Embed All</h2>
+                    <div>
+                        <table>`
+        for (actor of actorArr) {
+            content +=  `<tr>
+                            <td style="width: 30px"><input type="checkbox" id="check" name="${actor}" value="${actor}"></td>
+                            <td style="text-align: left"><label for="${actor}">${actor}</label>
+                        </tr>`
+        }
+        content += `</table></div>`
+        buttons = { Delete: {label: "Embed Selected", callback: (html) => {addActors(html)}},
+                    DeleteAll: {label: "Embed All", callback: (html) => {addActors(html, actorArr)}}}
+    }
+    
+    dialog.data.title = title;
+    dialog.data.buttons = buttons;
+    dialog.data.content = content;
+    dialog.render(true);
+    const dialogDOM = document.querySelector(`#${dialog.id}`);
+    dialogDOM.style.height = "";
+    dialog.position.height = null;
+
+    async function addActors(html, Arr=[]) {
+        if (Arr.length === 0) {
+            const cbs = html.find('[id="check"]');  // array
+            for (const cb of cbs) {
+                if (cb.checked) {
+                    Arr.push(cb.value);
+                }
+            }
+        }
+        for (const actorName of Arr) {
+            const actor = game.actors.getName(actorName);
+            const dupActor = duplicate(actor);
+            delete dupActor["folder"];
+            delete dupActor["sort"];
+            await canvas.scene.setFlag("token-independence", actorName, dupActor);
+            
+            // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
+            canvas.tokens.updateAll(t => ({name: actor.name}), t => t.data.actorId === actor._id);
+        }
+    }
+
+}
+
