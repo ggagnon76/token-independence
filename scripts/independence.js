@@ -28,7 +28,12 @@ Hooks.on('pasteToken', (tokenCollection, tokenArray) => {
     canvas.draw();
 })
 
-Hooks.on('createToken', () => {
+Hooks.on('createToken', (scene, token) => {
+    debugger;
+    const actorID = token.actorId;
+    const actor = game.actors.get(actorID);
+    // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
+    canvas.tokens.updateAll(t => ({name: actor.name}), t => t.data.actorId === actor._id);
     ui.sidebar.render(true);
 })
 
@@ -198,9 +203,6 @@ function addActors() {
             delete dupActor["folder"];
             delete dupActor["sort"];
             await canvas.scene.setFlag("token-independence", actorName, dupActor);
-            
-            // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
-            canvas.tokens.updateAll(t => ({name: actor.name}), t => t.data.actorId === actor._id);
         }
     }
 
