@@ -24,10 +24,10 @@ Keep your scenes folder tidy too, store what you don't immediately need in a com
 
 ## How to use this module
 
-When at least one token from a valid actor is placed into a scene, a button will appear in the actor's UI bar.
+When at least one token from a valid actor is placed into a scene, a button will appear in the actor's UI bar.  
 ![image](img/Options Menu Button.webp)
 
-Clicking on this button will create a dialog with up to three buttons.
+Clicking on this button will create a dialog with up to three buttons.  
 ![image](img/Options Menu.webp)
 
 In order for the *Embed Actor(s)* option button to appear, three conditions must be met:
@@ -35,25 +35,21 @@ In order for the *Embed Actor(s)* option button to appear, three conditions must
  - belongs to an actor currently in the actor folder, and
  - the actor can't already be embedded in the scene
 
-By pressing the Embed Actor(s) option button, you will be presented with a list of all the actors that meet those three requirements.  You may choose one, several or embed them all at once.
-
+By pressing the Embed Actor(s) option button, you will be presented with a list of all the actors that meet those three requirements.  You may choose one, several or embed them all at once.  
 ![image](img/Embed Option.webp)
 
 In order for the *Remove Embedded Actor(s)* option button to appear, there must be one or more actors embedded in the scene.
-By pressing the *Remove Embedded Actor(s)* option button, you will be presented with a list of all the embedded actors.  You may choose one, several or remove them all at once.
-
+By pressing the *Remove Embedded Actor(s)* option button, you will be presented with a list of all the embedded actors.  You may choose one, several or remove them all at once.  
 ![image](img/Remove Option.webp)
 
 ## Bonus feature
-If your scene contains a token that has neither an actor in the actor's folder, nor an actor embedded by this module, then you will get a notification when the canvas is drawn.
-
+If your scene contains a token that has neither an actor in the actor's folder, nor an actor embedded by this module, then you will get a notification when the canvas is drawn.  
 ![image](img/Notification.webp)
 
 When this condition occurs, a third option button will become available, which will allow you to attach (any) actor in the actor's folder to that token.
 ***NOTE!  The module can't know what is an appropriate actor for your token.  It will just do what you tell it to do.  So if you attach a dragon actor to a goblin token, well you're going to get a frankenstein creature.  For some, this might almost be a feature!?***
 
-By pressing the *Reattach Actor to Token(s)* button, you will be presented with a text box input and a list of all the broken tokens.
-
+By pressing the *Reattach Actor to Token(s)* button, you will be presented with a text box input and a list of all the broken tokens.  
 ![image](img/Reattach Option.webp)
 In this example, tokens were created using Token Mold to give them unique names.
 
@@ -64,7 +60,7 @@ The dialog works as follows:
 
 
 
-See the early Proof of Concept in action:
+## See the early Proof of Concept in action:
 [![Watch the video](https://img.youtube.com/vi/40zC-dGjw-s/maxresdefault.jpg)](https://youtu.be/40zC-dGjw-s)
 
 
