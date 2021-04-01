@@ -25,7 +25,7 @@ Keep your scenes folder tidy too, store what you don't immediately need in a com
 ## How to use this module
 
 When at least one token from a valid actor is placed into a scene, a button will appear in the actor's UI bar.  
-![](img/Options Menu Button.webp)  
+![](<img/Options Menu Button.webp>)  
 
 Clicking on this button will create a dialog with up to three buttons.  
 ![](img/Options Menu.webp)  
