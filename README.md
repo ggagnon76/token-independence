@@ -1,9 +1,9 @@
 # FoundryVTT - Token-Independence
 [![GitHub downloads (latest)](https://img.shields.io/badge/dynamic/json?label=Downloads@latest&query=assets[?(@.name.includes('zip'))].download_count&url=https://api.github.com/repos/ggagnon76/token-independence/releases/latest&color=green)](https://github.com/ggagnon76/token-independence/releases/latest)
 
-**[Compatibility]**: *FoundryVTT* 0.7.9 
-**[Systems]**: *D&D5e* 
-**[Languages]**: *English* 
+**[Compatibility]**: *FoundryVTT* 0.7.9  
+**[Systems]**: *D&D5e*  
+**[Languages]**: *English*  
 
 This module allows a GM to populate a scene with tokens from actors and then embed the bare minimum actor data into the scene flags, allowing the module to recreate synthetic actors to implement full functionality without needing the actor in the actor folder.
 
@@ -36,20 +36,24 @@ In order for the *Embed Actor(s)* option button to appear, three conditions must
  - the actor can't already be embedded in the scene
 
 By pressing the Embed Actor(s) option button, you will be presented with a list of all the actors that meet those three requirements.  You may choose one, several or embed them all at once.
+
 ![image](img/Embed Option.webp)
 
 In order for the *Remove Embedded Actor(s)* option button to appear, there must be one or more actors embedded in the scene.
 By pressing the *Remove Embedded Actor(s)* option button, you will be presented with a list of all the embedded actors.  You may choose one, several or remove them all at once.
+
 ![image](img/Remove Option.webp)
 
 ## Bonus feature
 If your scene contains a token that has neither an actor in the actor's folder, nor an actor embedded by this module, then you will get a notification when the canvas is drawn.
+
 ![image](img/Notification.webp)
 
 When this condition occurs, a third option button will become available, which will allow you to attach (any) actor in the actor's folder to that token.
 ***NOTE!  The module can't know what is an appropriate actor for your token.  It will just do what you tell it to do.  So if you attach a dragon actor to a goblin token, well you're going to get a frankenstein creature.  For some, this might almost be a feature!?***
 
 By pressing the *Reattach Actor to Token(s)* button, you will be presented with a text box input and a list of all the broken tokens.
+
 ![image](img/Reattach Option.webp)
 In this example, tokens were created using Token Mold to give them unique names.
 
