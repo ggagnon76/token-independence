@@ -29,7 +29,6 @@ Hooks.on('pasteToken', (tokenCollection, tokenArray) => {
 })
 
 Hooks.on('createToken', (scene, token) => {
-    debugger;
     const actorID = token.actorId;
     const actor = game.actors.get(actorID);
     // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
@@ -74,7 +73,9 @@ function createDialog() {
     const title = `Token-Independence Options`;
     let content = `<style>#TIoptionButtons .dialog-buttons {flex-direction: column;}</style>`;
     let buttons = {};
-    let tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null);
+    let tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null).map(n => n.name); 
+    const sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]); 
+    tokenArr = tokenArr.filter(o => sceneActors.indexOf(o) === -1);
     if (tokenArr.length > 0) {
         buttons.add = {label: "Embed actor(s) into scene", callback: () => {addActors()}}
     } else {
@@ -234,7 +235,7 @@ function attachActors() {
     for (const token of IndTokenArr) {
         content +=  `<tr>
                         <td style="width: 30px"><input type="checkbox" id="check" name="${token.data.name}" value="${token.id}"></td>
-                        <td style="text-align: left"><label for="${token.data.name}">${token.data.name}</label>
+                        <td style="text-align: left"><label for="${token.data.name}">${token.data.name} (${token.data.actorData.name})</label>
                     </tr>`
     }
     content += `</table></div>`
