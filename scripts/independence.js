@@ -156,7 +156,9 @@ function addActors() {
         const isActor = game.actors.filter(a => a.name === token.data.name).length > 0 ? true : false;
         if (isActor) TokenArr.push(token.data.name)
     });
-    const actorArr = [... new Set(TokenArr)];
+    let actorArr = [... new Set(TokenArr)];
+    const sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]);
+    actorArr = actorArr.filter(o => sceneActors.indexOf(o) === -1);
 
     if (actorArr.length === 0) {
         content = `There are no tokens placed in the scene.  Place a token for the actor(s) you wish to embed first!`;
