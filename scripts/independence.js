@@ -29,7 +29,6 @@ Hooks.on('pasteToken', (tokenCollection, tokenArray) => {
 })
 
 Hooks.on('createToken', (scene, token) => {
-    debugger;
     const actorID = token.actorId;
     const actor = game.actors.get(actorID);
     // The following is required to stop console errors resulting from phantom tokens created by the Multi Level Tokens module.
