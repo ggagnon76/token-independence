@@ -29,8 +29,11 @@ Hooks.on('pasteToken', (tokenCollection, tokenArray) => {
 })
 
 Hooks.on('createToken', (scene, token) => {
+    debugger;
     const actorID = token.actorId;
     const actor = game.actors.get(actorID);
+    // The following is required to stop console errors resulting from phantom tokens created by the Multi Level Tokens module.
+    if (!actor) return
     // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
     canvas.tokens.updateAll(t => ({name: actor.name}), t => t.data.actorId === actor._id);
     ui.sidebar.render(true);
