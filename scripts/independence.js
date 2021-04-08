@@ -1,5 +1,8 @@
 Hooks.on('canvasReady', () =>  {
     
+    // Following is needed to render the menu button if tokens are present in a scene.  See Hooks.on("renderSidebarTab")
+    ui.sidebar.render(true);
+
     const IndTokenArr = [];
     const TokenArr = canvas.tokens.placeables;
     for (const token of TokenArr) {
@@ -20,8 +23,7 @@ Hooks.on('canvasReady', () =>  {
         synthActor = actor.constructor.createTokenActor(actor, token);
         token.actor = synthActor;
     }
-    // Following is needed to render the menu button if tokens are present in a scene.  See Hooks.on("renderSidebarTab")
-    ui.sidebar.render(true);
+    
 })
 
 Hooks.on('pasteToken', (tokenCollection, tokenArray) => {
@@ -56,17 +58,15 @@ Hooks.on("renderSidebarTab", async (app, html) => {
     if(game.user.isGM) {
         // Only render on Actors tab
         if (app.options.id == "actors") {
-            const TokenArr = canvas.tokens.placeables || null;
-            if (TokenArr === null) return
+            const TokenArr = canvas.tokens.placeables;
             // Only render the button if there are tokens in a scene
-            if (TokenArr.length > 0) {
-                // Create a button that when clicked, will create the actor "DDB Temp Actor".  Insert the button before the search field on the Actor tab.
-                let button = $("<div class='header-actions action-buttons flexrow'><button class='ddb-import'>Token Independence</button>")
-                button.click(function () {
-                    createDialog();
-                });
-                html.find("div.header-search.flexrow").before(button);
-            }
+            if (TokenArr.length === 0) return
+            // Create a button that when clicked, will launch the dialog menu.  Insert the button before the search field on the Actor tab.
+            let button = $("<div class='header-actions action-buttons flexrow'><button class='ddb-import'>Token Independence</button>")
+            button.click(function () {
+                createDialog();
+            });
+            html.find("div.header-search.flexrow").before(button);
         }
     }
 })
@@ -75,8 +75,11 @@ function createDialog() {
     const title = `Token-Independence Options`;
     let content = `<style>#TIoptionButtons .dialog-buttons {flex-direction: column;}</style>`;
     let buttons = {};
-    let tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null).map(n => n.name); 
-    const sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]); 
+    let tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null).map(n => n.name);
+    let sceneActors = [];
+    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
+        sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]);
+    }
     tokenArr = tokenArr.filter(o => sceneActors.indexOf(o) === -1);
     if (tokenArr.length > 0) {
         buttons.add = {label: "Embed actor(s) into scene", callback: () => {addActors()}}
@@ -151,15 +154,19 @@ function addActors() {
     const sceneName = canvas.scene.data.name;
     const title = `Embed actor(s) to scene "${sceneName}"`;
     let content = ``;
-    let buttons = {}
-
+    let buttons = {};
+    let sceneActors = [];
     let TokenArr = [];
+    
     canvas.tokens.placeables.forEach(token => {
         const isActor = game.actors.filter(a => a.name === token.data.name).length > 0 ? true : false;
         if (isActor) TokenArr.push(token.data.name)
     });
     let actorArr = [... new Set(TokenArr)];
-    const sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]);
+
+    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
+        sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]);
+    }
     actorArr = actorArr.filter(o => sceneActors.indexOf(o) === -1);
 
     if (actorArr.length === 0) {
