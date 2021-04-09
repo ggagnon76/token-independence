@@ -82,7 +82,7 @@ function createDialog() {
     }
     tokenArr = tokenArr.filter(o => sceneActors.indexOf(o) === -1);
     if (tokenArr.length > 0) {
-        buttons.add = {label: "Embed actor(s) into scene", callback: () => {addActors()}}
+        buttons.add = {label: "Embed actor(s) into scene", callback: () => {addActorDialog()}}
     } else {
         content += `<p>There must be an actor in the Actor's folder with a token in the scene to be able to embed.</p>`
     }
@@ -150,10 +150,24 @@ function removeActors() {
     }
 }
 
-function addActors() {
+function addActorDialog(preContent = ``) {
     const sceneName = canvas.scene.data.name;
+    const sceneSize = estimateBytes(canvas.scene);
+    const tokenSize = estimateBytes(canvas.scene.data.tokens);
+    const drawingSize = estimateBytes(canvas.scene.data.drawings);
+    const allFlagSize = estimateBytes(canvas.scene.data.flags);
+    const lightSize = estimateBytes(canvas.scene.data.lights);
+    const noteSize = estimateBytes(canvas.scene.data.notes);
+    const soundSize = estimateBytes(canvas.scene.data.sounds);
+    const templateSize = estimateBytes(canvas.scene.data.templates);
+    const tileSize = estimateBytes(canvas.scene.data.tiles);
+    const wallSize = estimateBytes(canvas.scene.data.walls);
+    let flagSize = 0;
+    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
+        flagSize = estimateBytes(canvas.scene.data.flags["token-independence"]);
+    } 
     const title = `Embed actor(s) to scene "${sceneName}"`;
-    let content = ``;
+    let content = preContent;
     let buttons = {};
     let sceneActors = [];
     let TokenArr = [];
@@ -173,18 +187,38 @@ function addActors() {
         content = `There are no tokens placed in the scene.  Place a token for the actor(s) you wish to embed first!`;
         buttons = {Exit: {label: "Exit", callback: () => {dialog.close()}}};
     } else {
-        content =   `<h2>Select actor(s) and Embed or Embed All</h2>
+        content +=   `   <p>The following are estimates of the database string size for the following components, in bytes:
+                        <li style="color: blue">Tokens + embedded actors: ${tokenSize + flagSize} bytes.</li>
+                        <li>All other flags: ${allFlagSize - flagSize} bytes.</li>
+                        <li>Drawings: ${drawingSize} bytes.</li>
+                        <li>Lights: ${lightSize} bytes.</li>
+                        <li>Notes: ${noteSize} bytes.</li>
+                        <li>Sounds: ${soundSize} bytes.</li>
+                        <li>Templates: ${templateSize} bytes.</li>
+                        <li>Tiles: ${tileSize} bytes.</li>
+                        <li>Walls: ${wallSize} bytes.</li>
+                        <h2> </h2>
+                        <li style="color: blue">Total Scene size: ${sceneSize} bytes.</li>
+                        <h2 style="padding: 10px">Token Independence will not allow more than 1mb of data for tokens and embedded actors in a scene!</h2>
+                        <h2 style="padding: 10px">Select actor(s) and Embed or...</h2>
+                    
                     <div>
                         <table>`
+        let actorSizeSum = 0;
         for (actor of actorArr) {
+            const actorSize = estimateBytes(dupActor(actor));
+            actorSizeSum += actorSize;
             content +=  `<tr>
                             <td style="width: 30px"><input type="checkbox" id="check" name="${actor}" value="${actor}"></td>
-                            <td style="text-align: left"><label for="${actor}">${actor}</label>
+                            <td style="width: 200px text-align: left"><label for="${actor}">${actor}</label>
+                            <td style="text-align: left">(${actorSize} bytes)
                         </tr>`
         }
-        content += `</table></div>`
-        buttons = { Delete: {label: "Embed Selected", callback: (html) => {addActors(html)}},
-                    DeleteAll: {label: "Embed All", callback: (html) => {addActors(html, actorArr)}}}
+        content += `    </table>
+                    <h2 style="padding: 10px">...Embed All (${actorSizeSum} bytes.)</h2>
+                    </div>`
+        buttons = { Delete: {label: "Embed Selected", callback: (html) => {addActors(html, sceneSize)}},
+                    DeleteAll: {label: "Embed All", callback: (html) => {addActors(html, sceneSize, actorArr)}}}
     }
     
     dialog.data.title = title;
@@ -196,7 +230,7 @@ function addActors() {
     dialog.position.height = null;
     canvas.draw();
 
-    async function addActors(html, Arr=[]) {
+    async function addActors(html, sceneSize, Arr=[]) {
         if (Arr.length === 0) {
             const cbs = html.find('[id="check"]');  // array
             for (const cb of cbs) {
@@ -209,12 +243,15 @@ function addActors() {
             ui.notifications.error("You did not select any actors to embed!");
             return
         }
+        let actorSizeSum = 0; 
         for (const actorName of Arr) {
-            const actor = game.actors.getName(actorName);
-            const dupActor = duplicate(actor);
-            delete dupActor["folder"];
-            delete dupActor["sort"];
-            await canvas.scene.setFlag("token-independence", actorName, dupActor);
+            actorSizeSum += estimateBytes(dupActor(actorName));
+        }
+        if ((sceneSize + actorSizeSum) > 1000000) {
+            return addActorDialog('<h1 style="color: red">The selected actors exceeded the 1mb limit!</h1>')
+        }
+        for (const actorName of Arr) {
+            await canvas.scene.setFlag("token-independence", actorName, dupActor(actorName));
         }
     }
 
@@ -294,4 +331,18 @@ function attachActors() {
         }
         await canvas.tokens.updateMany(updates);
     }
+}
+
+function estimateBytes (entity) {
+    const entityDup = entity;
+    const sceneString = JSON.stringify(entityDup);
+    return (new TextEncoder().encode(sceneString)).length;
+}
+
+function dupActor (actorName) {
+    const actor = game.actors.getName(actorName);
+    const dupActor = duplicate(actor);
+    delete dupActor["folder"];
+    delete dupActor["sort"];
+    return dupActor
 }
