@@ -19,9 +19,10 @@ Hooks.on('canvasReady', () =>  {
             continue;
         }
 
-        actor = new game.dnd5e.entities.Actor5e(freedomFighterObj);
-        synthActor = actor.constructor.createTokenActor(actor, token);
-        token.actor = synthActor;
+        const cls = getDocumentClass("Actor");
+        const tokenActor = new cls(freedomFighterObj, {parent: token.document});
+        token.document._actor = tokenActor;
+        game.actors.tokens[token.id] = tokenActor;
     }
     
 })
@@ -58,9 +59,9 @@ Hooks.on("renderSidebarTab", async (app, html) => {
     if(game.user.isGM) {
         // Only render on Actors tab
         if (app.options.id == "actors") {
-            const TokenArr = canvas.tokens.placeables;
+            const TokenArr = canvas?.tokens?.placeables;
             // Only render the button if there are tokens in a scene
-            if (TokenArr.length === 0) return
+            if (TokenArr === undefined || TokenArr.length === 0) return
             // Create a button that when clicked, will launch the dialog menu.  Insert the button before the search field on the Actor tab.
             let button = $("<div class='header-actions action-buttons flexrow'><button class='ddb-import'>Token Independence</button>")
             button.click(function () {
@@ -325,11 +326,11 @@ function attachActors() {
             const tok = canvas.tokens.placeables.find(t => t.id === token);
             const obj = {
                 "_id": tok.data._id,
-                "actorId": actor._id
+                "actorId": actor.id
             }
             updates.push(obj)
         }
-        await canvas.tokens.updateMany(updates);
+        await canvas.scene.updateEmbeddedDocuments("Token", updates);
     }
 }
 
