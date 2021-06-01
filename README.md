@@ -2,7 +2,7 @@
 [![GitHub downloads (latest)](https://img.shields.io/badge/dynamic/json?label=Downloads@latest&query=assets[?(@.name.includes('zip'))].download_count&url=https://api.github.com/repos/ggagnon76/token-independence/releases/latest&color=green)](https://github.com/ggagnon76/token-independence/releases/latest)
 
 **[Compatibility]**: *FoundryVTT* 0.8.6  
-**[Systems]**: *D&D5e*  
+**[Systems]**: *ALL*  
 **[Languages]**: *English*  
 
 This module allows a GM to populate a scene with tokens from actors and then embed the bare minimum actor data into the scene flags, allowing the module to recreate synthetic actors to implement full functionality without needing the actor in the actor folder.
