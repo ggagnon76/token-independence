@@ -1,8 +1,4 @@
-Hooks.on('canvasReady', () =>  {
-    
-    // Following is needed to render the menu button if tokens are present in a scene.  See Hooks.on("renderSidebarTab")
-    ui.sidebar.render(true);
-
+function populateSynthetics() {
     const IndTokenArr = [];
     const TokenArr = canvas.tokens.placeables;
     for (const token of TokenArr) {
@@ -13,45 +9,20 @@ Hooks.on('canvasReady', () =>  {
 
     for (const token of IndTokenArr) {
         const name = token.data.name;
-        const freedomFighterObj = canvas.scene.data.flags["token-independence"][name];
-        if (!freedomFighterObj) {
+        let embeddedActor = canvas.scene.data.flags["token-independence"][name];
+        if (!embeddedActor) {
             ui.notifications.info(`${name} token(s) is/are broken.  To fix it, choose "Reattach Actor to Token(s)" in the menu.`);
             continue;
         }
 
         const cls = getDocumentClass("Actor");
-        const tokenActor = new cls(freedomFighterObj, {parent: token.document});
-        token.document._actor = tokenActor;
-        game.actors.tokens[token.id] = tokenActor;
+        const tokenActor = new cls(embeddedActor, {parent: token.document});
+        const overrideData = foundry.utils.mergeObject(tokenActor.toJSON(), token.data.actorData);
+        const derivedActor = new cls(overrideData, {parent: token.document});
+        token.document._actor = derivedActor;
+        game.actors.tokens[token.id] = derivedActor;
     }
-    
-})
-
-Hooks.on('pasteToken', (tokenCollection, tokenArray) => {
-    canvas.draw();
-})
-
-Hooks.on('createToken', (scene, token) => {
-    const actorID = token.actorId;
-    const actor = game.actors.get(actorID);
-    // The following is required to stop console errors resulting from phantom tokens created by the Multi Level Tokens module.
-    if (!actor) return
-    // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
-    canvas.tokens.updateAll(t => ({name: actor.name}), t => t.data.actorId === actor._id);
-    ui.sidebar.render(true);
-})
-
-Hooks.on('deleteToken', () => {
-    ui.sidebar.render(true);
-})
-
-Hooks.on('deleteActor', () => {
-    canvas.draw();
-})
-
-Hooks.on('createActor', () => {
-    canvas.draw();
-})
+}
 
 // Add a button to the actor Sidebar, that when clicked will render a Dialog with options.
 Hooks.on("renderSidebarTab", async (app, html) => {
@@ -62,22 +33,22 @@ Hooks.on("renderSidebarTab", async (app, html) => {
             const TokenArr = canvas?.tokens?.placeables;
             // Only render the button if there are tokens in a scene
             if (TokenArr === undefined || TokenArr.length === 0) return
-            // Create a button that when clicked, will launch the dialog menu.  Insert the button before the search field on the Actor tab.
+            // Create a button that will launch the dialog menu when clicked.  Insert the button before the search field on the Actor tab.
             let button = $("<div class='header-actions action-buttons flexrow'><button class='ddb-import'>Token Independence</button>")
-            button.click(function () {
-                createDialog();
-            });
+            button.click(function () { createDialog(); });
             html.find("div.header-search.flexrow").before(button);
         }
     }
 })
 
 function createDialog() {
-    const title = `Token-Independence Options`;
-    let content = `<style>#TIoptionButtons .dialog-buttons {flex-direction: column;}</style>`;
+    const title = `Token-Independence Menu`;
+    let content = ``;
     let buttons = {};
     let tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null).map(n => n.name);
     let sceneActors = [];
+
+    // logic to enable or disable button to add actors to scene
     if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
         sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]);
     }
@@ -85,28 +56,69 @@ function createDialog() {
     if (tokenArr.length > 0) {
         buttons.add = {label: "Embed actor(s) into scene", callback: () => {addActorDialog()}}
     } else {
-        content += `<p>There must be an actor in the Actor's folder with a token in the scene to be able to embed.</p>`
+        buttons.add = {label: "DISABLED.  Actors already embedded or no tokens in scene.", callback: () => {dialog.close()}}
     }
+
+    // logic to enable or disable button to remove embedded actors from scene
     const isIndFlag = canvas.scene.data.flags.hasOwnProperty("token-independence");
     if (isIndFlag) {
         const flagKeys = Object.keys(canvas.scene.data.flags["token-independence"]);
         if (flagKeys.length > 0) {
             buttons.remove = {label: "Remove embedded actor(s) from scene", callback: () => {removeActors()}}
         } else {
-            content += `<p>There must be embedded actors in the scene to be able to remove them.</p>`
+            buttons.remove = {label: "DISABLED.  No embedded actors in scene.", callback: () => {dialog.close()}}
         }
     } else {
-        content += `<p>There must be embedded actors in the scene to be able to remove them.</p>`
+        buttons.remove = {label: "DISABLED.  No embedded actors in scene.", callback: () => {dialog.close()}}
     }
+
+    // logic to enable or disable button to reattach tokens to actors in actor folder.
     tokenArr = canvas.tokens.placeables.filter(t => t.actor === null);
     const actorArr = game.actors.filter(a => a.name !== null);
     if (tokenArr.length > 0 && actorArr.length > 0) {
         buttons.reattach = {label: "Reattach Actor to Token(s)", callback: () => {attachActors()}};
     } else {
-        content += `<p>There have to be broken tokens and actors in the Actor's folder to be able to reattach.</p>`
+        buttons.reattach = {label: "DISABLED. No broken tokens, or actors in folder to link.", callback: () => {dialog.close()}};
     }
+
+    // launch dialog window.
     dialog = new Dialog({title, content, buttons}, {id: "TIoptionButtons"}).render(true);
 }
+
+Hooks.on('canvasReady', () =>  {
+    
+    // Following will trigger the "renderSidebarTab" hook, and our logic to display the menu button (or not)
+    ui.sidebar.render(true);
+    // The following function creates a synthetic actor using an embedded actor data and adds it to the collection(?)
+    populateSynthetics();
+    
+})
+
+Hooks.on('pasteToken', () => {
+    populateSynthetics();
+})
+
+Hooks.on('createToken', (tokenDoc) => {
+    const actorID = tokenDoc.actor.data._id;
+    const actor = game.actors.get(actorID);
+    // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
+    canvas.tokens.updateAll(t => ({name: actor.name}), t => t.data.actorId === actor.id);
+    // Following will trigger the "renderSidebarTab" hook, and our logic to display the menu button (or not)
+    ui.sidebar.render(true);
+})
+
+Hooks.on('deleteToken', () => {
+    // Following will trigger the "renderSidebarTab" hook, and our logic to display the menu button (or not)
+    ui.sidebar.render(true);
+})
+
+Hooks.on('deleteActor', () => {
+    canvas.draw();
+})
+
+Hooks.on('createActor', () => {
+    populateSynthetics();
+})
 
 function removeActors() {
     const sceneName = canvas.scene.data.name;
