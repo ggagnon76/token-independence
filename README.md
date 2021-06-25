@@ -1,7 +1,7 @@
 # FoundryVTT - Token-Independence
 [![GitHub downloads (latest)](https://img.shields.io/badge/dynamic/json?label=Downloads@latest&query=assets[?(@.name.includes('zip'))].download_count&url=https://api.github.com/repos/ggagnon76/token-independence/releases/latest&color=green)](https://github.com/ggagnon76/token-independence/releases/latest)
 
-**[Compatibility]**: *FoundryVTT* 0.8.7  
+**[Compatibility]**: *FoundryVTT* 0.8.8  
 **[Systems]**: *ALL*  
 **[Languages]**: *English*  
 

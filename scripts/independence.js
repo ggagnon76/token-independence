@@ -53,33 +53,28 @@ function createDialog() {
         sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]);
     }
     tokenArr = tokenArr.filter(o => sceneActors.indexOf(o) === -1);
+    buttons.add = {label: "DISABLED.  Actors already embedded or no tokens in scene.", callback: () => {dialog.close()}}
     if (tokenArr.length > 0) {
         buttons.add = {label: "Embed actor(s) into scene", callback: () => {addActorDialog()}}
-    } else {
-        buttons.add = {label: "DISABLED.  Actors already embedded or no tokens in scene.", callback: () => {dialog.close()}}
-    }
+    } 
 
     // logic to enable or disable button to remove embedded actors from scene
     const isIndFlag = canvas.scene.data.flags.hasOwnProperty("token-independence");
+    buttons.remove = {label: "DISABLED.  No embedded actors in scene.", callback: () => {dialog.close()}};
     if (isIndFlag) {
         const flagKeys = Object.keys(canvas.scene.data.flags["token-independence"]);
         if (flagKeys.length > 0) {
             buttons.remove = {label: "Remove embedded actor(s) from scene", callback: () => {removeActors()}}
-        } else {
-            buttons.remove = {label: "DISABLED.  No embedded actors in scene.", callback: () => {dialog.close()}}
-        }
-    } else {
-        buttons.remove = {label: "DISABLED.  No embedded actors in scene.", callback: () => {dialog.close()}}
+        } 
     }
-
+    
     // logic to enable or disable button to reattach tokens to actors in actor folder.
     tokenArr = canvas.tokens.placeables.filter(t => t.actor === null);
     const actorArr = game.actors.filter(a => a.name !== null);
+    buttons.reattach = {label: "DISABLED. No broken tokens, or actors in folder to link.", callback: () => {dialog.close()}};
     if (tokenArr.length > 0 && actorArr.length > 0) {
         buttons.reattach = {label: "Reattach Actor to Token(s)", callback: () => {attachActors()}};
-    } else {
-        buttons.reattach = {label: "DISABLED. No broken tokens, or actors in folder to link.", callback: () => {dialog.close()}};
-    }
+    } 
 
     // launch dialog window.
     dialog = new Dialog({title, content, buttons}, {id: "TIoptionButtons"}).render(true);
@@ -112,10 +107,6 @@ Hooks.on('deleteToken', () => {
     ui.sidebar.render(true);
 })
 
-Hooks.on('deleteActor', () => {
-    canvas.draw();
-})
-
 Hooks.on('createActor', () => {
     populateSynthetics();
 })
@@ -139,14 +130,8 @@ function removeActors() {
 
     const buttons = { Delete: {label: "Remove Selected", callback: (html) => {deleteActors(html)}},
                 DeleteAll: {label: "Remove All", callback: (html) => {deleteActors(html, keys)}}}
-    dialog.data.title = title;
-    dialog.data.buttons = buttons;
-    dialog.data.content = content;
-    dialog.render(true);
-    const dialogDOM = document.querySelector(`#${dialog.id}`);
-    dialogDOM.style.height = "";
-    dialog.position.height = null;
-    canvas.draw();
+   
+    dialog = new Dialog({title, content, buttons}).render(true);
 
     async function deleteActors(html, Arr = []) {
         if (Arr.length === 0) {
@@ -234,14 +219,7 @@ function addActorDialog(preContent = ``) {
                     DeleteAll: {label: "Embed All", callback: (html) => {addActors(html, sceneSize, actorArr)}}}
     }
     
-    dialog.data.title = title;
-    dialog.data.buttons = buttons;
-    dialog.data.content = content;
-    dialog.render(true);
-    const dialogDOM = document.querySelector(`#${dialog.id}`);
-    dialogDOM.style.height = "";
-    dialog.position.height = null;
-    canvas.draw();
+    dialog = new Dialog({title, content, buttons}).render(true);
 
     async function addActors(html, sceneSize, Arr=[]) {
         if (Arr.length === 0) {
@@ -303,13 +281,9 @@ function attachActors() {
     buttons = { Attach: {label: "Attach Actor", callback: (html) => {attachActor(html); canvas.draw()}},
                 Quit: {label: "Exit", callback: () => {dialog.close()}}
             }
-    dialog.data.title = title;
-    dialog.data.buttons = buttons;
-    dialog.data.content = content;
-    dialog.render(true);
-    const dialogDOM = document.querySelector(`#${dialog.id}`);
-    dialogDOM.style.height = "";
-    dialog.position.height = null;
+
+    dialog = new Dialog({title, content, buttons}).render(true);
+
 
     async function attachActor(html) {
         const actorName = html.find('[name="attachActor"]').val();
