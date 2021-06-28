@@ -1,0 +1,27 @@
+{{preContent}}
+<p>The following are estimates of the database string size for the following components:
+<li style="color: blue">Tokens + embedded actors: {{TISize}} bytes.</li>
+<li>All other flags: {{otherFlags}} bytes.</li>
+<li>Drawings: {{drawingSize}} bytes.</li>
+<li>Lights: {{lightSize}} bytes.</li>
+<li>Notes: {{noteSize}} bytes.</li>
+<li>Sounds: {{soundSize}} bytes.</li>
+<li>Templates: {{templateSize}} bytes.</li>
+<li>Tiles: {{tileSize}} bytes.</li>
+<li>Walls: {{wallSize}} bytes.</li>
+<h2> </h2>
+<li style="color: blue">Total approximate scene size: {{sceneSize}} bytes.</li>
+<h2 style="padding: 10px">Token Independence will not allow more than 1mb (1,000,000 bytes) of data for tokens and embedded actors in a scene!</h2>
+<h2 style="padding: 10px">Select actor(s) and Embed or...</h2>
+<div>
+    <table>
+    {{#each actorArray}}
+        <tr>
+            <td style="width: 30px"><input type="checkbox" id="check" name="{{this.name}}" value="{{this.name}}"></td>
+            <td style="width: 200px text-align: left"><label for="{{this.name}}">{{this.name}}</label>
+            <td style="text-align: left">({{this.size}} bytes)
+        </tr>
+    {{/each}}
+    </table>
+    <h2 style="padding: 10px">...Embed All ({{actorSizeSum}} bytes.)</h2>
+</div>
