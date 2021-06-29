@@ -29,23 +29,26 @@ export function populateSynthetics() {
 export function createDialog() {
     const title = `Token-Independence Menu`;
     let content = ``;
-    let buttons = {};
-    let tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null).map(n => n.name);
-    let sceneActors = [];
+    let buttons = {
+       add: {label: "DISABLED.  Actors already embedded or no tokens in scene.", callback: () => {dialog.close()}},
+       remove: {label: "DISABLED.  No embedded actors in scene.", callback: () => {dialog.close()}},
+       reattach: {label: "DISABLED. No broken tokens, or actors in folder to link.", callback: () => {dialog.close()}}
+    };
 
     // logic to enable or disable button to add actors to scene
+    let sceneActors = [];
     if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
         sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]);
     }
+
+    let tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null).map(n => n.name);
     tokenArr = tokenArr.filter(o => sceneActors.indexOf(o) === -1);
-    buttons.add = {label: "DISABLED.  Actors already embedded or no tokens in scene.", callback: () => {dialog.close()}}
     if (tokenArr.length > 0) {
         buttons.add = {label: "Embed actor(s) into scene", callback: () => {addActorDialog()}}
     } 
 
     // logic to enable or disable button to remove embedded actors from scene
     const isIndFlag = canvas.scene.data.flags.hasOwnProperty("token-independence");
-    buttons.remove = {label: "DISABLED.  No embedded actors in scene.", callback: () => {dialog.close()}};
     if (isIndFlag) {
         const flagKeys = Object.keys(canvas.scene.data.flags["token-independence"]);
         if (flagKeys.length > 0) {
@@ -56,7 +59,7 @@ export function createDialog() {
     // logic to enable or disable button to reattach tokens to actors in actor folder.
     tokenArr = canvas.tokens.placeables.filter(t => t.actor === null);
     const actorArr = game.actors.filter(a => a.name !== null);
-    buttons.reattach = {label: "DISABLED. No broken tokens, or actors in folder to link.", callback: () => {dialog.close()}};
+    
     if (tokenArr.length > 0 && actorArr.length > 0) {
         buttons.reattach = {label: "Reattach Actor to Token(s)", callback: () => {attachActors()}};
     } 
@@ -79,26 +82,20 @@ async function deleteActors(html, Arr = []) {
     }
 }
 
-function removeActors() {
+async function removeActors() {
+    
+    const removeActorData = {
+        actors: Object.keys(canvas.scene.data.flags["token-independence"])
+    }
+
     const sceneName = canvas.scene.data.name;
     const title = `Remove embedded actors from scene "${sceneName}"`;
-    let content = ``;
-
-    const keys = Object.keys(canvas.scene.data.flags["token-independence"]);
-    content =   `<h2>Select actors and Remove or Remove All</h2>
-                <div>
-                    <table>`
-    for (const actor of keys) {
-        content +=  `<tr>
-                        <td style="width: 30px"><input type="checkbox" id="check" name="${actor}" value="${actor}"></td>
-                        <td style="text-align: left"><label for="${actor}">${actor}</label>
-                    </tr>`
-    }
-    content += `</table></div>`
-
-    const buttons = { Delete: {label: "Remove Selected", callback: (html) => {deleteActors(html)}},
-                DeleteAll: {label: "Remove All", callback: (html) => {deleteActors(html, keys)}}}
-   
+    const buttons = { 
+        Delete: {label: "Remove Selected", callback: (html) => {deleteActors(html)}},
+        DeleteAll: {label: "Remove All", callback: (html) => {deleteActors(html, removeActorData.actors)}}
+    };
+    const content = await renderInner("./modules/token-independence/templates/removeActor.hbs", removeActorData);
+    
     dialog = new Dialog({title, content, buttons}).render(true);
 }
 
@@ -179,8 +176,10 @@ async function addActorDialog(preContent = ``) {
             addActorData.actorSizeSum += estimateBytes(dupActor(actor));
         }
         content = await renderInner("./modules/token-independence/templates/AddActor.hbs", addActorData);
-        buttons = { Embed: {label: "Embed Selected", callback: (html) => {addActors(html, addActorData.sceneSize)}},
-                    EmbedAll: {label: "Embed All", callback: (html) => {addActors(html, addActorData.sceneSize, addActorData.actorArray)}}}
+        buttons = { 
+            Embed: {label: "Embed Selected", callback: (html) => {addActors(html, addActorData.sceneSize)}},
+            EmbedAll: {label: "Embed All", callback: (html) => {addActors(html, addActorData.sceneSize, addActorData.actorArray)}}
+        };
     }
     
     dialog = new Dialog({title, content, buttons}).render(true);
@@ -221,9 +220,6 @@ async function attachActor(html) {
 }
 
 async function attachActors() {
-    const sceneName = canvas.scene.data.name;
-    const title = `Attach actor from Actors folder to Token(s) in "${sceneName}"`;
-    let buttons = {}
 
     const attachActorData = {
         tokens: []
@@ -241,12 +237,13 @@ async function attachActors() {
         }
     }
 
-
+    const sceneName = canvas.scene.data.name;
+    const title = `Attach actor from Actors folder to Token(s) in "${sceneName}"`;
+    const buttons = {
+        Attach: {label: "Attach Actor", callback: (html) => {attachActor(html)}},
+        Quit: {label: "Exit", callback: () => {dialog.close()}}
+    };
     const content = await renderInner("./modules/token-independence/templates/AttachActor.hbs", attachActorData);
-    buttons =   { 
-                    Attach: {label: "Attach Actor", callback: (html) => {attachActor(html)}},
-                    Quit: {label: "Exit", callback: () => {dialog.close()}}
-                }
 
     dialog = new Dialog({title, content, buttons}).render(true);
 }

@@ -39,5 +39,3 @@ Hooks.on('createToken', (tokenDoc) => {
 
 // Following will trigger the "renderSidebarTab" hook, and our logic to display the menu button (or not)
 Hooks.on('deleteToken', () => ui.sidebar.render(true));
-
-Hooks.on('createActor', populateSynthetics);
