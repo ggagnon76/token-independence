@@ -6,7 +6,7 @@
   "library": "false",
   "manifestPlusVersion": "1.0.0",
   "minimumCoreVersion": "0.8.6",
-  "compatibleCoreVersion": "0.8.7",
+  "compatibleCoreVersion": "0.8.8",
   "authors": [
     {
       "name": "Kerrec Snowmane",
@@ -21,10 +21,10 @@
     
   ],
   "esmodules": [
-    
+    "/scripts/independence.js"
   ],
   "scripts": [
-    "/scripts/independence.js"
+    
   ],
   "styles": [
     "/styles/module.css"

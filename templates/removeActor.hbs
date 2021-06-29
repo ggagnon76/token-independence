@@ -1,0 +1,11 @@
+<h2>Select actors and Remove or Remove All</h2>
+<div>
+    <table>
+        {{#each actors}}
+            <tr>
+                <td style="width: 30px"><input type="checkbox" id="check" name="{{this}}" value="{{this}}"></td>
+                <td style="text-align: left"><label for="{{this}}">{{this}}</label>
+            </tr>
+        {{/each}}
+    </table>
+</div>
