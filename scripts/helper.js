@@ -1,5 +1,43 @@
 let dialog;
 
+/** Logic that defines if the conditions are met to render the button in the actor tab of the sidebar.
+ *  Returns true if:
+ *   - User is a GM
+ *   - There is at least 1 token in the scene
+ *   - There is at least 1 actor embedded in flag data
+ *  @return {Boolean}
+ */
+function isButton() {
+    const isGM = game.user.isGM;
+    const isTokenArr = canvas.tokens?.placeables.length;
+    const isEmbedded = Object.keys(canvas.scene.data.flags["token-independence"]).length;
+
+    if (isGM && (isTokenArr || isEmbedded)) return true;
+
+    return false;
+}
+
+/** This function will add the button to the actor sidebar when the conditions are correct,
+ *  or it will remove the button when the conditions are no longer met.
+ *  @return {void}
+ */
+export function toggleButton() {
+    const isButtonAlready = $(".TI_Button").length;
+    const buttonCheck = $(".TI_Button");
+
+    if (isButton()) {
+        // If button is already there, exit the function
+        if (isButtonAlready) return;
+        // Add the button
+        let buttonHTML = `<div class='header-actions action-buttons flexrow'><button class='TI_Button'>Token Independence</button>`;
+        $("#actors .directory-header").append(buttonHTML);
+        $(".TI_Button").click(createDialog)
+    } else {
+        // Remove the button, if it exists
+        $(".TI_Button").remove();
+    }
+}
+
 export function populateSynthetics() {
     const IndTokenArr = [];
     const TokenArr = canvas.tokens.placeables;
@@ -26,7 +64,7 @@ export function populateSynthetics() {
     }
 }
 
-export function createDialog() {
+function createDialog() {
     const title = `Token-Independence Menu`;
     let content = ``;
     let buttons = {
@@ -80,6 +118,8 @@ async function deleteActors(html, Arr = []) {
     for (const actor of Arr) {
         await canvas.scene.unsetFlag("token-independence", actor);
     }
+
+    toggleButton();
 }
 
 async function removeActors() {
