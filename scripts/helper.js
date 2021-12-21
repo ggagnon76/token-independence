@@ -2,9 +2,9 @@ let dialog;
 
 /** Logic that defines if the conditions are met to render the button in the actor tab of the sidebar.
  *  Returns true if:
- *   - User is a GM
- *   - There is at least 1 token in the scene
- *   - There is at least 1 actor embedded in flag data
+ *   - User is a GM, and one of;
+ *      - There is at least 1 token in the scene, OR
+ *      - There is at least 1 actor embedded in flag data
  *  @return {Boolean}
  */
 function isButton() {
@@ -23,9 +23,8 @@ function isButton() {
  */
 export function toggleButton() {
     const isButtonAlready = $(".TI_Button").length;
-    const buttonCheck = $(".TI_Button");
 
-    if (isButton()) {
+    if ( isButton() ) {
         // If button is already there, exit the function
         if (isButtonAlready) return;
         // Add the button
@@ -64,6 +63,77 @@ export function populateSynthetics() {
     }
 }
 
+/** Logic that defines if the conditions are met to enable the 'ADD' button in the Dialog Menu
+ *  To return true, these conditions must be met:
+ *    - There must be a token in the scene, AND
+ *    - There must be an actor tied to that token in the actor sidebar, AND
+ *    - The actor must not already be embedded in the scene
+ *  @returns {boolean}
+ */
+function isAddButton() {
+    // If there are no tokens in the scene, then
+    if (!canvas.token.placeables.length) return false;
+
+    // Gather an array of token names from tokens that reference existing actors in the sidebar
+    const tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null).map(n => n.name);
+
+    // Gather an array of actor names already embedded in the scene
+    let embeddedActorArr = [];
+    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
+        embeddedActorArr = Object.keys(canvas.scene.data.flags["token-independence"]);
+    }
+
+    // Filter tokenArr to remove any actors already in embeddedActorArr
+    const filteredTokenArr = tokenArr.filter(a => !embeddedActorArr.includes(a));
+
+    // If there are tokens on the canvas for existing actors that are not already embedded, then
+    if (filteredTokenArr.length) return true;
+
+    // Otherwise, there are no tokens with existing actors that are not already embedded, so
+    return false;
+}
+
+/** Logic that defines if the conditions are met to enable the 'REMOVE' button in the Dialog Menu
+ *  To return true, these conditions must be met:
+ *    - There must be an actor embedded in the scene
+ *  @returns {boolean}
+ */
+function isRemoveButton () {
+    // Gather an array of actor names already embedded in the scene
+    let embeddedActorArr = [];
+    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
+        embeddedActorArr = Object.keys(canvas.scene.data.flags["token-independence"]);
+    }
+
+    // If there is at least one, then
+    if (embeddedActorArr.length) return true;
+
+    // Otherwise, there are no actors embedded in the scene, so
+    return false;
+}
+
+/** Logic that defines if the conditions are met to enable the 'REATTACH' button in the Dialog Menu
+ *  To return true, these conditions must be met:
+ *    - There must be a broken token in the scene, AND
+ *    - There must be actor(s) in the sidebar
+ *  @returns {boolean}
+ */
+function isAttachButton() {
+    const brokenTokens = canvas.tokens.placeables.filter(t => t.actor === null);
+    
+    // If there are no broken tokens in the scene, then
+    if (!brokenTokens.length) return false;
+
+    // Check if there are actors in the actors folder
+    const isActors = game.actors.length;
+
+    // If there are broken tokens AND actors, then
+    if (brokenTokens && isActors) return true;
+
+    // Otherwise, there are no actors to link to, so
+    return false;
+}
+
 function createDialog() {
     const title = `Token-Independence Menu`;
     let content = ``;
@@ -73,32 +143,18 @@ function createDialog() {
        reattach: {label: "DISABLED. No broken tokens, or actors in folder to link.", callback: () => {dialog.close()}}
     };
 
-    // logic to enable or disable button to add actors to scene
-    let sceneActors = [];
-    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
-        sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]);
-    }
-
-    let tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null).map(n => n.name);
-    tokenArr = tokenArr.filter(o => sceneActors.indexOf(o) === -1);
-    if (tokenArr.length > 0) {
+    // Check if the conditions exist to be allowed to embed actors into the scene flags
+    if ( isAddButton() ) {
         buttons.add = {label: "Embed actor(s) into scene", callback: () => {addActorDialog()}}
     } 
 
-    // logic to enable or disable button to remove embedded actors from scene
-    const isIndFlag = canvas.scene.data.flags.hasOwnProperty("token-independence");
-    if (isIndFlag) {
-        const flagKeys = Object.keys(canvas.scene.data.flags["token-independence"]);
-        if (flagKeys.length > 0) {
-            buttons.remove = {label: "Remove embedded actor(s) from scene", callback: () => {removeActors()}}
-        } 
-    }
+    // Check if the conditions exist to be allowed to remove embedded actors from scene flags
+    if ( isRemoveButton() ) {
+        buttons.remove = {label: "Remove embedded actor(s) from scene", callback: () => {removeActors()}}
+    } 
     
-    // logic to enable or disable button to reattach tokens to actors in actor folder.
-    tokenArr = canvas.tokens.placeables.filter(t => t.actor === null);
-    const actorArr = game.actors.filter(a => a.name !== null);
-    
-    if (tokenArr.length > 0 && actorArr.length > 0) {
+    // Check if the conditions exist to be allowed to re-link actors to tokens
+    if ( isAttachButton() ) {
         buttons.reattach = {label: "Reattach Actor to Token(s)", callback: () => {attachActors()}};
     } 
 
