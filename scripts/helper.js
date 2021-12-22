@@ -3,16 +3,19 @@ let dialog;
 /** Logic that defines if the conditions are met to render the button in the actor tab of the sidebar.
  *  Returns true if:
  *   - User is a GM, and one of;
- *      - There is at least 1 token in the scene, OR
+ *      - There is at least 1 token in the scene AND at least 1 actor in the actors folder, OR
  *      - There is at least 1 actor embedded in flag data
  *  @return {Boolean}
  */
 function isButton() {
     const isGM = game.user.isGM;
     const isTokenArr = canvas.tokens?.placeables.length;
-    const isEmbedded = Object.keys(canvas.scene.data.flags["token-independence"]).length;
-
-    if (isGM && (isTokenArr || isEmbedded)) return true;
+    const isActors = game.actors.size;
+    let isEmbedded = false;
+    if (canvas.scene?.data.flags.hasOwnProperty("token-independence")) {
+        isEmbedded = Object.keys(canvas.scene.data.flags["token-independence"]).length;
+    }
+    if (isGM && ((isTokenArr && isActors) || isEmbedded)) return true;
 
     return false;
 }
@@ -47,7 +50,7 @@ export function populateSynthetics() {
     if (IndTokenArr.length === 0) return;
 
     for (const token of IndTokenArr) {
-        const name = token.data.name;
+        const name = token.data.flags["token-independence"].ActorName;
         let embeddedActor = canvas.scene.data.flags["token-independence"][name];
         if (!embeddedActor) {
             ui.notifications.info(`${name} token(s) is/are broken.  To fix it, choose "Reattach Actor to Token(s)" in the menu.`);
@@ -72,7 +75,7 @@ export function populateSynthetics() {
  */
 function isAddButton() {
     // If there are no tokens in the scene, then
-    if (!canvas.token.placeables.length) return false;
+    if (!canvas.tokens.placeables.length) return false;
 
     // Gather an array of token names from tokens that reference existing actors in the sidebar
     const tokenArr = canvas.tokens.placeables.filter(t => t.actor !== null).map(n => n.name);
@@ -112,35 +115,12 @@ function isRemoveButton () {
     return false;
 }
 
-/** Logic that defines if the conditions are met to enable the 'REATTACH' button in the Dialog Menu
- *  To return true, these conditions must be met:
- *    - There must be a broken token in the scene, AND
- *    - There must be actor(s) in the sidebar
- *  @returns {boolean}
- */
-function isAttachButton() {
-    const brokenTokens = canvas.tokens.placeables.filter(t => t.actor === null);
-    
-    // If there are no broken tokens in the scene, then
-    if (!brokenTokens.length) return false;
-
-    // Check if there are actors in the actors folder
-    const isActors = game.actors.length;
-
-    // If there are broken tokens AND actors, then
-    if (brokenTokens && isActors) return true;
-
-    // Otherwise, there are no actors to link to, so
-    return false;
-}
-
 function createDialog() {
     const title = `Token-Independence Menu`;
     let content = ``;
     let buttons = {
        add: {label: "DISABLED.  Actors already embedded or no tokens in scene.", callback: () => {dialog.close()}},
-       remove: {label: "DISABLED.  No embedded actors in scene.", callback: () => {dialog.close()}},
-       reattach: {label: "DISABLED. No broken tokens, or actors in folder to link.", callback: () => {dialog.close()}}
+       remove: {label: "DISABLED.  No embedded actors in scene.", callback: () => {dialog.close()}}
     };
 
     // Check if the conditions exist to be allowed to embed actors into the scene flags
@@ -151,11 +131,6 @@ function createDialog() {
     // Check if the conditions exist to be allowed to remove embedded actors from scene flags
     if ( isRemoveButton() ) {
         buttons.remove = {label: "Remove embedded actor(s) from scene", callback: () => {removeActors()}}
-    } 
-    
-    // Check if the conditions exist to be allowed to re-link actors to tokens
-    if ( isAttachButton() ) {
-        buttons.reattach = {label: "Reattach Actor to Token(s)", callback: () => {attachActors()}};
     } 
 
     // launch dialog window.
@@ -212,15 +187,23 @@ async function addActors(html, sceneSize, Arr=[]) {
     for (const actor of Arr) {
         actorSizeSum += estimateBytes(dupActor(actor.name));
     }
-    if ((sceneSize + actorSizeSum) > 1000000) {
-        return addActorDialog('<h1 style="color: red">The selected actors exceeded the 1mb limit!</h1>')
+    if ((sceneSize + actorSizeSum) > 1000000) {  // Arbitrary limit imposed to satisfy Foundry Staff.
+        return Dialog.prompt({
+            title: "FLAG DATA ALLOTMENT EXCEEDED!!",
+            content: `  <div>The selected actors chosen to be embedded would have exceeded the 1mb allotment for actor flag data imposed by this module.</br></div>
+                        <h2></h2>
+                        <h2>BE AWARE THAT NO ACTORS HAVE BEEN EMBEDDED.</h2>
+                        <div>DELETING ACTORS WILL CAUSE ALL PLACED TOKENS OF THAT ACTOR TO BECOME BROKEN!!</div>`,
+            label: "Return to Embed Dialog",
+            callback: () => {addActorDialog()}
+        });
     }
     for (const actor of Arr) {
         await canvas.scene.setFlag("token-independence", actor.name, dupActor(actor.name));
     }
 }
 
-async function addActorDialog(preContent = ``) {
+async function addActorDialog() {
     const sceneName = canvas.scene.data.name;
     const tokenSize = estimateBytes(canvas.scene.data.tokens);
     let flagSize = 0;
@@ -236,8 +219,9 @@ async function addActorDialog(preContent = ``) {
     let TokenArr = [];
     
     canvas.tokens.placeables.forEach(token => {
-        const isActor = game.actors.filter(a => a.name === token.data.name).length > 0 ? true : false;
-        if (isActor) TokenArr.push(token.data.name)
+        const actorName = token.data.flags["token-independence"].ActorName;
+        const isActor = game.actors.filter(a => a.name === actorName).length > 0 ? true : false;
+        if (isActor) TokenArr.push(actorName)
     });
     let actorArr = [... new Set(TokenArr)];
 
@@ -247,7 +231,6 @@ async function addActorDialog(preContent = ``) {
     actorArr = actorArr.filter(o => sceneActors.indexOf(o) === -1);
 
     const addActorData = {
-        preContent: preContent,
         TISize: tokenSize + flagSize,
         otherFlags: allFlagSize - flagSize,
         sceneSize: estimateBytes(canvas.scene),
@@ -278,69 +261,6 @@ async function addActorDialog(preContent = ``) {
         };
     }
     
-    dialog = new Dialog({title, content, buttons}).render(true);
-}
-
-async function attachActor(html) {
-    const actorName = html.find('[name="attachActor"]').val();
-    if (actorName === "") {
-        ui.notifications.error("You did not enter the name of the actor to attach to!");
-        return
-    }
-    const actor = game.actors.getName(actorName);
-    if (!actor) {
-        ui.notifications.error("There is no actor by that name in the Actor's Folder!");
-        return
-    }
-    const tokenArr = [];
-    const cbs = html.find('[id="check"]');  // array
-    for (const cb of cbs) {
-        if (cb.checked) {
-            tokenArr.push(cb.value);
-        }
-    }
-    if (tokenArr.length === 0) {
-        ui.notifications.error("You did not select any tokens to attach the actor to!");
-        return
-    }
-    const updates = [];
-    for (const token of tokenArr) {
-        const tok = canvas.tokens.placeables.find(t => t.id === token);
-        const obj = {
-            "_id": tok.data._id,
-            "actorId": actor.id
-        }
-        updates.push(obj)
-    }
-    await canvas.scene.updateEmbeddedDocuments("Token", updates);
-}
-
-async function attachActors() {
-
-    const attachActorData = {
-        tokens: []
-    }
-
-    const TokenArr = canvas.tokens.placeables;
-    for (const token of TokenArr) {
-        if (!token.actor) {
-            const actorData = {
-                name: token.data.name,
-                id: token.id,
-                tokenName: token.data.actorData.name
-            }
-            attachActorData.tokens.push(actorData);
-        }
-    }
-
-    const sceneName = canvas.scene.data.name;
-    const title = `Attach actor from Actors folder to Token(s) in "${sceneName}"`;
-    const buttons = {
-        Attach: {label: "Attach Actor", callback: (html) => {attachActor(html)}},
-        Quit: {label: "Exit", callback: () => {dialog.close()}}
-    };
-    const content = await renderInner("./modules/token-independence/templates/AttachActor.hbs", attachActorData);
-
     dialog = new Dialog({title, content, buttons}).render(true);
 }
 

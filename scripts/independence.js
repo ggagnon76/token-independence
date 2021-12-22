@@ -12,14 +12,16 @@ Hooks.on('canvasReady', () =>  {
 
 Hooks.on('pasteToken', populateSynthetics);
 
-Hooks.on('createToken', (tokenDoc) => {
+Hooks.on('createToken', async (tokenDoc) => {
     const actorID = tokenDoc.actor.data._id;
     const actor = game.actors.get(actorID);
-    // This next line is to make this Token-Independence module compatible with the Token Mold module, which renames token.data.name, instead of just token.actorData.name
-    canvas.tokens.updateAll(t => ({name: actor.name}), t => t.data.actorId === actor.id);
+    await tokenDoc.setFlag("token-independence", "ActorName", actor.name)
     // Following will add or remove the button to/from the actor sidebar
     toggleButton();
 })
 
 // Following will add or remove the button to/from the actor sidebar
 Hooks.on('deleteToken', toggleButton);
+
+// If a 'misbehaving' module re-renders the sidebar, add or remove the button to/from the actor sidebar
+Hooks.on("renderSidebarTab", toggleButton);
