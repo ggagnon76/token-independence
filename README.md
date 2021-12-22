@@ -24,10 +24,10 @@ Keep your scenes folder tidy too, store what you don't immediately need in a com
 
 ## How to use this module
 
-When at least one token from a valid actor is placed into a scene, a button will appear in the actor's UI bar.  
+When the module detects conditions defining when it can be used, a button will appear in the actor's UI bar.  
 ![](<img/Options Menu Button.webp>)  
 
-Clicking on this button will create a dialog with up to three buttons.  
+Clicking on this button will create a dialog with two buttons.  
 ![](<img/Options Menu.webp>)  
 
 In order for the *Embed Actor(s)* option button to appear, three conditions must be met:
@@ -41,24 +41,6 @@ By pressing the Embed Actor(s) option button, you will be presented with a list 
 In order for the *Remove Embedded Actor(s)* option button to appear, there must be one or more actors embedded in the scene.
 By pressing the *Remove Embedded Actor(s)* option button, you will be presented with a list of all the embedded actors.  You may choose one, several or remove them all at once.  
 ![](<img/Remove Option.webp>)  
-
-## Bonus feature
-If your scene contains a token that has neither an actor in the actor's folder, nor an actor embedded by this module, then you will get a notification when the canvas is drawn.  
-![](<img/Notification.webp>)  
-
-When this condition occurs, a third option button will become available, which will allow you to attach (any) actor in the actor's folder to that token.
-***NOTE!  The module can't know what is an appropriate actor for your token.  It will just do what you tell it to do.  So if you attach a dragon actor to a goblin token, well you're going to get a frankenstein creature.  For some, this might almost be a feature!?***
-
-By pressing the *Reattach Actor to Token(s)* button, you will be presented with a text box input and a list of all the broken tokens.  
-![](<img/Reattach Option.webp>)  
-In this example, tokens were created using Token Mold to give them unique names.
-
-The dialog works as follows:
- - Area 2 lists all the broken tokens with selectable checkboxes.  The tokens will be named according to the data in token.data.name, which **should** match the name of the actor that spawned the token, and in parenthesis, the individual token name according to the data in token.actorData.name.
- - Area 1 is where you type the name of the actor, exactly as it is written in the actor's folder.  Whichever tokens have been selected via checkbox(es) will have this actor bound to it!
- - You can only do one actor at a time with this dialog option.
-
-
 
 ## See the early Proof of Concept in action:
 [![Watch the video](https://img.youtube.com/vi/40zC-dGjw-s/maxresdefault.jpg)](https://youtu.be/40zC-dGjw-s)
