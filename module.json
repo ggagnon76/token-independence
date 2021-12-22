@@ -2,11 +2,6 @@
   "name": "token-independence",
   "title": "Token Independence",
   "description": "Allow your tokens to live and work without their Actor overlords!",
-  "version": "This is auto replaced",
-  "library": "false",
-  "manifestPlusVersion": "1.0.0",
-  "minimumCoreVersion": "0.8.6",
-  "compatibleCoreVersion": "0.8.8",
   "authors": [
     {
       "name": "Kerrec Snowmane",
@@ -14,27 +9,27 @@
       "discord": "Kerrec Snowmane#5264"
     }
   ],
-  "dependencies": [
-
-  ],
-  "conflicts": [
-    
-  ],
+  "url": "https://github.com/ggagnon76/token-independence",
+  "bugs": "https://github.com/ggagnon76/token-independence/issues",
+  "flags": {},
+  "version": "This is auto replaced",
+  "minimumCoreVersion": "0.8.6",
+  "compatibleCoreVersion": "9",
+  "scripts": [],
   "esmodules": [
     "/scripts/independence.js"
-  ],
-  "scripts": [
-    
   ],
   "styles": [
     "/styles/module.css"
   ],
-  "languages": [
-    
-  ],
-  "url": "https://github.com/ggagnon76/token-independence",
+  "languages": [],
+  "packs": [],
+  "system": [],
+  "dependencies": [],
+  "socket": false,
   "manifest": "https://github.com/ggagnon76/token-independence/releases/latest/download/module.json",
-  "download": "https://github.com/ggagnon76/token-independence/releases/latest/download/module.zip",
-  "allowBugReporter": true,
-  "bugs": "https://github.com/ggagnon76/token-independence/issues"
+  "download": "https://github.com/ggagnon76/token-independence/releases/download/0.1.9/module.zip",
+  "protected": false,
+  "coreTranslation": false,
+  "library": "false"
 }
