@@ -217,7 +217,7 @@ async function addActorDialog() {
     let TokenArr = [];
     
     canvas.tokens.placeables.forEach(token => {
-        const actorName = token.data.flags["token-independence"].ActorName;
+        const actorName = token.data.flags["token-independence"]?.ActorName || "";
         const isActor = game.actors.filter(a => a.name === actorName).length > 0 ? true : false;
         if (isActor) TokenArr.push(actorName)
     });
