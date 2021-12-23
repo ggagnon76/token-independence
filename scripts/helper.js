@@ -50,12 +50,10 @@ export function populateSynthetics() {
     if (IndTokenArr.length === 0) return;
 
     for (const token of IndTokenArr) {
-        const name = token.data.flags["token-independence"].ActorName;
-        let embeddedActor = canvas.scene.data.flags["token-independence"][name];
-        if (!embeddedActor) {
-            ui.notifications.info(`${name} token(s) is/are broken.  To fix it, choose "Reattach Actor to Token(s)" in the menu.`);
-            continue;
-        }
+        const name = token.data.flags["token-independence"]?.ActorName || false;
+        if ( !name ) continue;
+        let embeddedActor = canvas.scene.data.flags["token-independence"][name]  || false;
+        if ( !embeddedActor ) continue;
 
         const cls = getDocumentClass("Actor");
         const tokenActor = new cls(embeddedActor, {parent: token.document});
