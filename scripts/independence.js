@@ -12,10 +12,9 @@ Hooks.on('canvasReady', () =>  {
 
 Hooks.on('pasteToken', populateSynthetics);
 
-Hooks.on('createToken', async (tokenDoc) => {
-    const actorID = tokenDoc.actor.data._id;
-    const actor = game.actors.get(actorID);
-    await tokenDoc.setFlag("token-independence", "ActorName", actor.name)
+Hooks.on('createToken', (tokenDoc) => {
+    const actor = game.actors.get(tokenDoc.actorId);
+    tokenDoc.setFlag("token-independence", "ActorName", actor.name)
     // Following will add or remove the button to/from the actor sidebar
     toggleButton();
 })

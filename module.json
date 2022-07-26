@@ -1,5 +1,5 @@
 {
-  "name": "token-independence",
+  "id": "token-independence",
   "title": "Token Independence",
   "description": "Allow your tokens to live and work without their Actor overlords!",
   "authors": [
@@ -10,11 +10,16 @@
     }
   ],
   "url": "https://github.com/ggagnon76/token-independence",
-  "bugs": "https://github.com/ggagnon76/token-independence/issues",
+  "license" : "https://github.com/ggagnon76/token-independence/blob/master/LICENSE",
+  "readme" : "https://github.com/ggagnon76/token-independence/blob/master/README.md",
+  "bugs" : "https://github.com/ggagnon76/token-independence/issues",
+  "changelog" : "https://github.com/ggagnon76/token-independence/releases",
   "flags": {},
   "version": "This is auto replaced",
-  "minimumCoreVersion": "0.8.6",
-  "compatibleCoreVersion": "9",
+  "compatibility" : {
+    "minimum" : 10,
+    "verified" : 10.275
+  },
   "scripts": [],
   "esmodules": [
     "/scripts/independence.js"
@@ -24,8 +29,10 @@
   ],
   "languages": [],
   "packs": [],
-  "system": [],
-  "dependencies": [],
+  "relationships" : {
+    "systems" : [],
+    "requires" : []
+  },
   "socket": false,
   "manifest": "https://github.com/ggagnon76/token-independence/releases/latest/download/module.json",
   "download": "https://github.com/ggagnon76/token-independence/releases/download/0.1.9/module.zip",

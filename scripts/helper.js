@@ -12,8 +12,8 @@ function isButton() {
     const isTokenArr = canvas.tokens?.placeables.length;
     const isActors = game.actors.size;
     let isEmbedded = false;
-    if (canvas.scene?.data.flags.hasOwnProperty("token-independence")) {
-        isEmbedded = Object.keys(canvas.scene.data.flags["token-independence"]).length;
+    if (canvas.scene?.flags.hasOwnProperty("token-independence")) {
+        isEmbedded = Object.keys(canvas.scene.flags["token-independence"]).length;
     }
     if (isGM && ((isTokenArr && isActors) || isEmbedded)) return true;
 
@@ -50,14 +50,14 @@ export function populateSynthetics() {
     if (IndTokenArr.length === 0) return;
 
     for (const token of IndTokenArr) {
-        const name = token.data.flags["token-independence"]?.ActorName || false;
+        const name = token.document.flags["token-independence"]?.ActorName || false;
         if ( !name ) continue;
-        let embeddedActor = canvas.scene.data.flags["token-independence"][name]  || false;
+        let embeddedActor = canvas.scene.flags["token-independence"][name]  || false;
         if ( !embeddedActor ) continue;
 
         const cls = getDocumentClass("Actor");
         const tokenActor = new cls(embeddedActor, {parent: token.document});
-        const overrideData = foundry.utils.mergeObject(tokenActor.toJSON(), token.data.actorData);
+        const overrideData = foundry.utils.mergeObject(tokenActor.toJSON(), token.actorData);
         const derivedActor = new cls(overrideData, {parent: token.document});
         token.document._actor = derivedActor;
         game.actors.tokens[token.id] = derivedActor;
@@ -80,8 +80,8 @@ function isAddButton() {
 
     // Gather an array of actor names already embedded in the scene
     let embeddedActorArr = [];
-    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
-        embeddedActorArr = Object.keys(canvas.scene.data.flags["token-independence"]);
+    if (canvas.scene.flags.hasOwnProperty("token-independence")) {
+        embeddedActorArr = Object.keys(canvas.scene.flags["token-independence"]);
     }
 
     // Filter tokenArr to remove any actors already in embeddedActorArr
@@ -102,8 +102,8 @@ function isAddButton() {
 function isRemoveButton () {
     // Gather an array of actor names already embedded in the scene
     let embeddedActorArr = [];
-    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
-        embeddedActorArr = Object.keys(canvas.scene.data.flags["token-independence"]);
+    if (canvas.scene.flags.hasOwnProperty("token-independence")) {
+        embeddedActorArr = Object.keys(canvas.scene.flags["token-independence"]);
     }
 
     // If there is at least one, then
@@ -154,10 +154,10 @@ async function deleteActors(html, Arr = []) {
 async function removeActors() {
     
     const removeActorData = {
-        actors: Object.keys(canvas.scene.data.flags["token-independence"])
+        actors: Object.keys(canvas.scene.flags["token-independence"])
     }
 
-    const sceneName = canvas.scene.data.name;
+    const sceneName = canvas.scene.name;
     const title = `Remove embedded actors from scene "${sceneName}"`;
     const buttons = { 
         Delete: {label: "Remove Selected", callback: (html) => {deleteActors(html)}},
@@ -202,13 +202,13 @@ async function addActors(html, sceneSize, Arr=[]) {
 }
 
 async function addActorDialog() {
-    const sceneName = canvas.scene.data.name;
-    const tokenSize = estimateBytes(canvas.scene.data.tokens);
+    const sceneName = canvas.scene.name;
+    const tokenSize = estimateBytes(canvas.scene.tokens);
     let flagSize = 0;
-    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
-        flagSize += estimateBytes(canvas.scene.data.flags["token-independence"]);
+    if (canvas.scene.flags.hasOwnProperty("token-independence")) {
+        flagSize += estimateBytes(canvas.scene.flags["token-independence"]);
     }
-    const allFlagSize = estimateBytes(canvas.scene.data.flags);
+    const allFlagSize = estimateBytes(canvas.scene.flags);
 
     const title = `Embed actor(s) to scene "${sceneName}"`;
     let content = `There are no tokens placed in the scene.  Place a token for the actor(s) you wish to embed first!`;
@@ -217,14 +217,14 @@ async function addActorDialog() {
     let TokenArr = [];
     
     canvas.tokens.placeables.forEach(token => {
-        const actorName = token.data.flags["token-independence"]?.ActorName || "";
+        const actorName = token.document.flags["token-independence"]?.ActorName || "";
         const isActor = game.actors.filter(a => a.name === actorName).length > 0 ? true : false;
         if (isActor) TokenArr.push(actorName)
     });
     let actorArr = [... new Set(TokenArr)];
 
-    if (canvas.scene.data.flags.hasOwnProperty("token-independence")) {
-        sceneActors = Object.keys(canvas.scene.data.flags["token-independence"]);
+    if (canvas.scene.flags.hasOwnProperty("token-independence")) {
+        sceneActors = Object.keys(canvas.scene.flags["token-independence"]);
     }
     actorArr = actorArr.filter(o => sceneActors.indexOf(o) === -1);
 
@@ -232,13 +232,13 @@ async function addActorDialog() {
         TISize: tokenSize + flagSize,
         otherFlags: allFlagSize - flagSize,
         sceneSize: estimateBytes(canvas.scene),
-        drawingSize: estimateBytes(canvas.scene.data.drawings),
-        lightSize: estimateBytes(canvas.scene.data.lights),
-        noteSize: estimateBytes(canvas.scene.data.notes),
-        soundSize: estimateBytes(canvas.scene.data.sounds),
-        templateSize: estimateBytes(canvas.scene.data.templates),
-        tileSize: estimateBytes(canvas.scene.data.tiles),
-        wallSize: estimateBytes(canvas.scene.data.walls),
+        drawingSize: estimateBytes(canvas.scene.drawings),
+        lightSize: estimateBytes(canvas.scene.lights),
+        noteSize: estimateBytes(canvas.scene.notes),
+        soundSize: estimateBytes(canvas.scene.sounds),
+        templateSize: estimateBytes(canvas.scene.templates),
+        tileSize: estimateBytes(canvas.scene.tiles),
+        wallSize: estimateBytes(canvas.scene.walls),
         actorSizeSum: 0,
         actorArray: []
     }
