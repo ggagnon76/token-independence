@@ -15,7 +15,7 @@
   "bugs" : "https://github.com/ggagnon76/token-independence/issues",
   "changelog" : "https://github.com/ggagnon76/token-independence/releases",
   "flags": {},
-  "version": "This is auto replaced",
+  "version": "0.3",
   "compatibility" : {
     "minimum" : 10,
     "verified" : 10.275
